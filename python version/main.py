@@ -1,8 +1,12 @@
-
+import classes
 
 # основной цикл
 def main():
-	pass
+	pole = classes.Pole()
+	print(pole.grid)
+
+	pole.generatePole(5)
+	print(pole.grid)
 
 
 

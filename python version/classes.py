@@ -16,12 +16,14 @@ class Player(object):
 		# список с тем, что есть у игрока (просто список для рассчёта прибыли и т.д.) (элементы - экземпляры классов объектов)
 		# мб сделать просто словарик с 'названием':'количесвтом' (всё равно всё храниться на карте)
 		self.hold_list = []
-
 		self.balance = 0
 
 
 		self.color = (0, 0, 0)
 		self.nick = 'NoName'
+
+
+		self.ip = ''
 
 		
 		
@@ -39,6 +41,9 @@ class Player(object):
 		res = self.hold_list.pop(key, None)
 		return res # возвращает значение удалённого элемента
 
+	def profitRelease(self):
+		self.balance += self.profit
+
 
 
 class Content(object):
@@ -50,9 +55,21 @@ class Content(object):
 
 class Pole(object):
 	"""docstring for Pole"""
-	def __init__(self, arg):
-		super(Pole, self).__init__()
-		self.arg = arg
+	def __init__(self, grid = None):
+
+		self.grid = grid
+
+	def generatePole(self, side:int):
+
+		string_polya = []
+		grid = []
+
+		for i in range(side):
+			string_polya.append(None)
+		for i in range(side):
+			grid.append(string_polya)
+
+		self.grid = grid
 		
 		
 
@@ -93,6 +110,35 @@ class Cell(object):
 '''
 						
 
+
+
+class GAME(object):
+	"""docstring for GAME"""
+	def __init__(self, pole, players = []):
+
+		if isinstance(pole, Pole):
+	        self.pole = pole
+	    else:
+	        raise TypeError("Аргумент должен быть экземпляром класса Pole")
+		
+		self.players = players
+		
+
+
+	def addPlayer(self, pl):
+	    if isinstance(pl, Player):
+	        self.players.append(pl)
+	    else:
+	        raise TypeError("Аргумент должен быть экземпляром класса Player")
+		
+
+	def randomTree(self):
+		None
+
+	def profitUpdate(self):
+		# перерасчёт дохода для всех игроков
+		for i in self.players:
+			i.profitUpdate()
 
 
 
