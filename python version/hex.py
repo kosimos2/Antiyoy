@@ -2,8 +2,15 @@ import math, pygame, random
 # для переводчика
 '''
 def main():
-    grid = generateGrid(10)
+    # создание
+    grid = generateGrid(5)
+    gridHex = toHexGrid((35,35), grid, 40)
+
+
+    # отрисовка
     print(grid)
+    for i in gridHex:
+        print(i.center, i.corners, i.number)
 
 if __name__ == '__main__':
     main()
@@ -37,24 +44,6 @@ def coords(raw, number, side):
     return res
 
 
-
-def calculate_hexagon_sides_old(center_x, center_y, side_length):
-    sides = []
-    angle = 60  # угол между сторонами шестиугольника
-
-    for i in range(6):
-        start_x = center_x + side_length * math.cos(math.radians(angle * i))
-        start_y = center_y + side_length * math.sin(math.radians(angle * i))
-        end_x = center_x + side_length * math.cos(math.radians(angle * (i + 1)))
-        end_y = center_y + side_length * math.sin(math.radians(angle * (i + 1)))
-
-
-        sides.append((float(start_x), float(start_y), float(end_x), float(end_y)))
-
-
-    return sides
-
-
 def calculate_hexagon_sides(center, side_length, rotation = 30):
     center_x = center[0]
     center_y = center[1]
@@ -68,7 +57,6 @@ def calculate_hexagon_sides(center, side_length, rotation = 30):
         start_y = center_y + side_length * math.sin(math.radians(angle * i + rotation))
         
         sides.append((float(start_x), float(start_y)))
-
 
     return sides
 
@@ -108,8 +96,6 @@ def generateGrid(wight:int = None, height:int = None):
 
 
 
-        
-
 def toHexGrid(main_coords, grid, side_length):
     
     res = []
@@ -132,13 +118,6 @@ HEIGHT = 500 #переменная с высотой
 pygame.init() #Инициализация PyGame
 screen = pygame.display.set_mode((WIDTH, HEIGHT)) #создаём окно с размерами
 
-
-'''
-center_x = WIDTH/2
-center_y = HEIGHT/2
-side_length = 100
-hex1 = calculate_hexagon_sides(center_x, center_y, side_length)
-'''
 
 # создание
 grid = generateGrid(5)
