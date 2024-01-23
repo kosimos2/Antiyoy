@@ -27,6 +27,7 @@ class Player(object):
 
 		
 		
+		
 
 	def profitUpdate(self):
 		# обновление (рассчёт) дохода изходя из того, что в холд листе

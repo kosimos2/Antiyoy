@@ -1,35 +1,44 @@
 import math, pygame, random
+# для переводчика
+'''
+def main():
+    grid = generateGrid(10)
+    print(grid)
 
-def coords(a:int, b:int, rad):
-	x = a * (rad*2)
-	y = 0
-	for i in range(b):
-		x += 1*rad
-		y += 2*rad
-	res = (x, y)
-	return res
+if __name__ == '__main__':
+    main()
+'''
 
-def find_rectangle_sides(radius):
-    side_length = 2 * radius  # Длина стороны шестиугольника
-    width = side_length * math.sqrt(3)  # Ширина прямоугольника
-    length = 2 * radius + width  # Длина прямоугольника
+def coords(raw, number, side):
+    raw_x = raw[0]
+    raw_y = raw[1]
 
-    return length, width
-
-
-def calculate_hexagon_vertices(center_x, center_y, side_length):
-    vertices = []
-    angle = 2 * math.pi / 6  # Угол между сторонами шестиугольника
-
-    for i in range(6):
-        x = center_x + side_length * math.cos(i * angle)
-        y = center_y + side_length * math.sin(i * angle)
-        vertices.append((int(x), int(y)))
-
-    return vertices
+    a = number[0]
+    b = number[1]
 
 
-def calculate_hexagon_sides(center_x, center_y, side_length):
+    # вычисляем радиус зная сторону
+    rad = (side * math.sqrt(3)) / 2
+
+    # вычисляем x зная радиус и номер ячейки
+    x = (rad*2) * a + raw_x
+    # поправляем если это нечётная строка
+    if b % 2 != 0:
+        x += rad
+
+
+    gipotenusa = rad * 2
+    katet = rad
+    # вычисляем y через теорему пифагора
+    y = (math.sqrt(gipotenusa**2 - katet**2)) * b +raw_y
+    
+
+    res = (x, y)
+    return res
+
+
+
+def calculate_hexagon_sides_old(center_x, center_y, side_length):
     sides = []
     angle = 60  # угол между сторонами шестиугольника
 
@@ -46,7 +55,76 @@ def calculate_hexagon_sides(center_x, center_y, side_length):
     return sides
 
 
+def calculate_hexagon_sides(center, side_length, rotation = 30):
+    center_x = center[0]
+    center_y = center[1]
 
+
+    sides = []
+    angle = 60  # угол между сторонами шестиугольника
+
+    for i in range(6):
+        start_x = center_x + side_length * math.cos(math.radians(angle * i + rotation))
+        start_y = center_y + side_length * math.sin(math.radians(angle * i + rotation))
+        
+        sides.append((float(start_x), float(start_y)))
+
+
+    return sides
+
+
+class Cell(object):
+    """docstring for Cell"""
+    def __init__(self, number, center, corners):
+
+        self.number = number
+        # координаты центров (черепашка)
+        self.center = center
+        # список координат углов (список) (чтобы рисовать стороны)
+        self.corners = corners
+
+
+
+def generateGrid(wight:int = None, height:int = None):
+
+    if height is None and wight is None:
+        raise Exception("Высота и ширина не могут быть одновременно пустыми!")
+    elif height is None:
+        height = wight
+    elif wight is None:
+        wight = height
+    else:
+        raise Exception("Невозможный вариант №4")
+
+    # генерация
+    grid = []
+    for h in range(height):
+        interim = []
+        for w in range(wight):
+            interim.append((w,h))
+        grid.append(interim)
+
+    return grid
+
+
+
+        
+
+def toHexGrid(main_coords, grid, side_length):
+    
+    res = []
+    for row in grid:
+        for i in row:
+
+            # вычисляем координаты центра шестиугольника, зная его номер и координаты №0,0
+            center = coords(main_coords, i, side_length)
+            # вычисляем координаты его углов, зная координаты центра и длину стороны
+            corners = calculate_hexagon_sides(center, side_length)
+            # создаём экземпляр класса с заданными параметрами
+            res.append(Cell(i, center, corners))
+
+
+    return res
 
 bg_menu_color = (55, 55, 55)
 WIDTH = 500  #переменная с шириной
@@ -55,18 +133,22 @@ pygame.init() #Инициализация PyGame
 screen = pygame.display.set_mode((WIDTH, HEIGHT)) #создаём окно с размерами
 
 
-
+'''
 center_x = WIDTH/2
 center_y = HEIGHT/2
-side_length = 10
+side_length = 100
+hex1 = calculate_hexagon_sides(center_x, center_y, side_length)
+'''
 
-hex1 = calculate_hexagon_sides(0, 0, side_length)
-print(hex1)
+# создание
+grid = generateGrid(5)
+gridHex = toHexGrid((35,35), grid, 40)
 
 
-#button = pygame.Rect(WIDTH/2 - 25, HEIGHT/2 - 15,50,30)
-
-
+# отрисовка
+print(grid)
+for i in gridHex:
+    print(i.center, i.corners, i.number)
 
 
 #основной цикл игры
@@ -82,13 +164,12 @@ while running:
     
     
     if risuj:
-        #pygame.draw.rect(screen, (211, 211, 211), button)
         screen.fill(bg_menu_color)
 
+        #pygame.draw.polygon(screen, (253, 255, 11), hex1)
 
-        for i in hex1:
-        	
-        	pygame.draw.line(screen, (0, 0, 0), [i[0], i[1]], [i[2], i[3]], 5)
+        for i in gridHex:
+            pygame.draw.polygon(screen, (253, 255, 11), i.corners, 5)
 
         pygame.display.flip()
         risuj = False
@@ -96,5 +177,4 @@ while running:
 
 
 print(hexagon_vertices)
-
 
