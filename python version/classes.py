@@ -3,6 +3,23 @@
 переменные - snake_case
 константы - CAPS_CASE
 '''
+import pygame
+
+
+class Cell(object):
+	"""docstring for Cell"""
+	def __init__(self, center, corners):
+
+
+		#self.number = number # (column, row)
+		
+		# координаты центров (черепашка)
+		self.center = center # (x, y)
+		
+		# список координат углов (список) (чтобы рисовать стороны)
+		self.corners = corners # [(x, y), (x, y), (x, y), (x, y), (x, y), (x, y)]
+
+
 
 class Player(object):
 	"""docstring for Player"""
@@ -49,9 +66,13 @@ class Player(object):
 
 class Content(object):
 	"""docstring for Content"""
-	def __init__(self, arg):
-		super(Content, self).__init__()
-		self.arg = arg
+	def __init__(self, name:str, texture:str, center = (0, 0)):
+		self.name = name
+		self.texture = pygame.image.load(texture)
+
+		self.hitbox = self.texture.get_rect()
+		self.hitbox.center = center
+
 
 
 class Pole(object):
@@ -118,19 +139,19 @@ class GAME(object):
 	def __init__(self, pole, players = []):
 
 		if isinstance(pole, Pole):
-	        self.pole = pole
-	    else:
-	        raise TypeError("Аргумент должен быть экземпляром класса Pole")
+			self.pole = pole
+		else:
+			raise TypeError("Аргумент должен быть экземпляром класса Pole")
 		
 		self.players = players
 		
 
 
 	def addPlayer(self, pl):
-	    if isinstance(pl, Player):
-	        self.players.append(pl)
-	    else:
-	        raise TypeError("Аргумент должен быть экземпляром класса Player")
+		if isinstance(pl, Player):
+			self.players.append(pl)
+		else:
+			raise TypeError("Аргумент должен быть экземпляром класса Player")
 		
 
 	def randomTree(self):
@@ -140,12 +161,3 @@ class GAME(object):
 		# перерасчёт дохода для всех игроков
 		for i in self.players:
 			i.profitUpdate()
-
-
-
-
-
-
-
-
-
