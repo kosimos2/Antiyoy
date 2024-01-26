@@ -6,6 +6,16 @@
 import pygame
 
 
+class Content(object):
+	"""docstring for Content"""
+	def __init__(self, name:str, texture:str, center = (0, 0)):
+		self.name = name
+		self.texture = pygame.image.load(texture)
+
+		self.hitbox = self.texture.get_rect()
+		self.hitbox.center = center
+
+
 class Cell(object):
 	"""docstring for Cell"""
 	def __init__(self, center, corners):
@@ -18,6 +28,17 @@ class Cell(object):
 		
 		# список координат углов (список) (чтобы рисовать стороны)
 		self.corners = corners # [(x, y), (x, y), (x, y), (x, y), (x, y), (x, y)]
+
+		# что внутри
+		self.content = None
+
+
+class Pole(object):
+	"""docstring for Pole"""
+	def __init__(self, grid = None):
+
+		self.grid = grid
+
 
 
 
@@ -64,34 +85,9 @@ class Player(object):
 
 
 
-class Content(object):
-	"""docstring for Content"""
-	def __init__(self, name:str, texture:str, center = (0, 0)):
-		self.name = name
-		self.texture = pygame.image.load(texture)
-
-		self.hitbox = self.texture.get_rect()
-		self.hitbox.center = center
 
 
 
-class Pole(object):
-	"""docstring for Pole"""
-	def __init__(self, grid = None):
-
-		self.grid = grid
-
-	def generatePole(self, side:int):
-
-		string_polya = []
-		grid = []
-
-		for i in range(side):
-			string_polya.append(None)
-		for i in range(side):
-			grid.append(string_polya)
-
-		self.grid = grid
 		
 		
 

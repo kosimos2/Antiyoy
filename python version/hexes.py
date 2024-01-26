@@ -28,7 +28,6 @@ def coords(raw, number, side):
 	res = (x, y)
 	return res
 
-
 def calculate_hexagon_sides(center, side_length, rotation = 30):
 	center_x = center[0]
 	center_y = center[1]
@@ -44,10 +43,6 @@ def calculate_hexagon_sides(center, side_length, rotation = 30):
 		sides.append((float(start_x), float(start_y)))
 
 	return sides
-
-
-
-
 
 def generateGrid(wight:int = None, height:int = None):
 
@@ -68,8 +63,6 @@ def generateGrid(wight:int = None, height:int = None):
 
 	return grid
 
-
-
 def toHexGrid(main_coords, grid, side_length):
 	
 	res = []
@@ -83,13 +76,8 @@ def toHexGrid(main_coords, grid, side_length):
 			# вычисляем координаты его углов, зная координаты центра и длину стороны
 			corners = calculate_hexagon_sides(center, side_length)
 			# создаём экземпляр класса с заданными параметрами
-			
-
 			interim.append(classes.Cell(center, corners))
-
 		res.append(interim)
-
-
 	return res
 
 
@@ -100,14 +88,16 @@ def main():
 	pygame.init() #Инициализация PyGame
 	screen = pygame.display.set_mode((WIDTH, HEIGHT)) #создаём окно с размерами
 
-
 	# создание
 	grid = generateGrid(7, 4)
 	gridHex = toHexGrid((35,35), grid, 30)
 
 	el = classes.Content('elka', './textures/pine_low.png')
+	el.hitbox.center = gridHex[0][2].center
 	palm = classes.Content('palma', './textures/palm_low.png')
+	palm.hitbox.center = gridHex[3][3].center
 	man = classes.Content('man', './textures/spearman_low.png')
+	man.hitbox.center = gridHex[1][4].center
 
 
 	'''# вывод
@@ -132,6 +122,8 @@ def main():
 				if event.key == pygame.K_SPACE: 
 					risuj = True 
 		
+		
+
 		if risuj:
 			screen.fill(bg_menu_color)
 			
@@ -139,8 +131,11 @@ def main():
 				for i in row:
 					pygame.draw.polygon(screen, (253, 255, 11), i.corners, 5)
 
-			el.hitbox.center = gridHex[0][2].center
-			screen.blit(man.texture, el.hitbox)
+			
+			
+			screen.blit(man.texture, man.hitbox)
+			screen.blit(el.texture, el.hitbox)
+			screen.blit(palm.texture, palm.hitbox)
 
 
 
