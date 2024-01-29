@@ -20,7 +20,6 @@ class Cell(object):
 	"""docstring for Cell"""
 	def __init__(self, center, corners):
 
-
 		#self.number = number # (column, row)
 		
 		# координаты центров (черепашка)
@@ -31,6 +30,20 @@ class Cell(object):
 
 		# что внутри
 		self.content = None
+
+		self.belongs = None
+
+	def addContent(self, name:str, texture:str):
+
+		self.content = Content(name, texture, self.center)
+
+	def blit(self, screen, color, width, allow_content:bool = True):
+
+		pygame.draw.polygon(screen, color, self.corners, width)
+
+		if self.content and allow_content:
+			screen.blit(self.content.texture, self.content.hitbox)
+
 
 
 class Pole(object):

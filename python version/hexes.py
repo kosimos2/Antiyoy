@@ -92,24 +92,9 @@ def main():
 	grid = generateGrid(7, 4)
 	gridHex = toHexGrid((35,35), grid, 30)
 
-	el = classes.Content('elka', './textures/pine_low.png')
-	el.hitbox.center = gridHex[0][2].center
-	palm = classes.Content('palma', './textures/palm_low.png')
-	palm.hitbox.center = gridHex[3][3].center
-	man = classes.Content('man', './textures/spearman_low.png')
-	man.hitbox.center = gridHex[1][4].center
-
-
-	'''# вывод
-	print(gridHex)
-
-	for row in gridHex:
-		for column in row:
-			print(f"nomer: {row, column}", column.corners, column.center)
-
-		print(" ")
-	'''
-
+	gridHex[0][2].addContent('elka', './textures/pine_low.png')
+	gridHex[3][3].addContent('palma', './textures/palm_low.png')
+	gridHex[1][4].addContent('man', './textures/spearman_low.png')
 
 	#основной цикл игры
 	risuj = False
@@ -127,15 +112,12 @@ def main():
 		if risuj:
 			screen.fill(bg_menu_color)
 			
+
 			for row in gridHex:
 				for i in row:
-					pygame.draw.polygon(screen, (253, 255, 11), i.corners, 5)
+					i.blit(screen, (253, 255, 11), 5)
 
 			
-			
-			screen.blit(man.texture, man.hitbox)
-			screen.blit(el.texture, el.hitbox)
-			screen.blit(palm.texture, palm.hitbox)
 
 
 
