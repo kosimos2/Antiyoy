@@ -64,7 +64,6 @@ def generateGrid(wight:int = None, height:int = None):
 	return grid
 
 def toHexGrid(main_coords, grid, side_length):
-	
 	res = []
 	for row in grid:
 		
@@ -80,6 +79,31 @@ def toHexGrid(main_coords, grid, side_length):
 		res.append(interim)
 	return res
 
+# мб перевести на Cython
+def collideHex(point, hexagon):
+    center_x = sum(x for x, _ in hexagon) / len(hexagon)
+    center_y = sum(y for _, y in hexagon) / len(hexagon)
+
+    inside = False
+    j = len(hexagon) - 1
+    for i in range(len(hexagon)):
+        if (hexagon[i][1] > point[1]) != (hexagon[j][1] > point[1]) and \
+                point[0] < (hexagon[j][0] - hexagon[i][0]) * (point[1] - hexagon[i][1]) / \
+                (hexagon[j][1] - hexagon[i][1]) + hexagon[i][0]:
+            inside = not inside
+        j = i
+
+    return inside
+
+# мб перевести на Cython
+def collideHexes(point, grid):
+	for n, row in enumerate(grid):
+		for n2, i in enumerate(row):
+
+			if collideHex(point, i.corners, i.center):
+				return (n, n2)
+		
+
 
 def main():
 	bg_menu_color = (55, 55, 55)
@@ -92,7 +116,7 @@ def main():
 	grid = generateGrid(7, 4)
 	gridHex = toHexGrid((35,35), grid, 30)
 
-	gridHex[0][2].addContent('elka', './textures/pine_low.png')
+	gridHex[0][0].addContent('elka', './textures/pine_low.png')
 	gridHex[3][3].addContent('palma', './textures/palm_low.png')
 	gridHex[1][4].addContent('man', './textures/spearman_low.png')
 
