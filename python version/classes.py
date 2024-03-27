@@ -3,41 +3,52 @@
 переменные - snake_case
 константы - CAPS_CASE
 '''
-import pygame
+import pygame, math
 
-hex_textures = {
-	'algae':'./hex_textures/hex_algae.png',
-	'aqua':'./hex_textures/hex_aqua.png',
-	'blue':'./hex_textures/hex_blue.png',
-	'brass':'./hex_textures/hex_brass.png',
-	'brown':'./hex_textures/hex_brown.png',
-	'cyan':'./hex_textures/hex_cyan.png',
-	'gray':'./hex_textures/hex_gray.png',
-	'green':'./hex_textures/hex_green.png',
-	'ice':'./hex_textures/hex_ice.png',
-	'lavender':'./hex_textures/hex_lavender.png',
-	'mint':'./hex_textures/hex_mint.png',
-	'orchid':'./hex_textures/hex_orchid.png',
-	'purple':'./hex_textures/hex_purple.png',
-	'red':'./hex_textures/hex_red.png',
-	'rose':'./hex_textures/hex_rose.png',
-	'whiskey':'./hex_textures/hex_whiskey.png',
-	'yellow':'./hex_textures/hex_yellow.png'
-}
-hex_additional_textures = {
-	'shadow':'./hex_textures/hex_shadow.png',
-	'water':'./hex_textures/hex_water.png',
-	'back':'./hex_textures/hex_background.png',
-	None:'./hex_textures/hex_missing.png'
-}
-# переделываем все пути в текстуры списковым включением
+def load_textures(root, rotation = 30):
 
-#pygame.image.load().convert_alpha()
-hex_textures = {k: pygame.image.load(v) for k, v in hex_textures.items()}
-hex_additional_textures = {k: pygame.image.load(v) for k, v in hex_additional_textures.items()}
-#hex_textures = [pygame.image.load(hex_textures[i]) for i in hex_textures]
-#hex_additional_textures = [pygame.image.load(hex_additional_textures[i]) for i in hex_additional_textures]
+	hex_textures = {
+		'algae':f'{root}/hex_algae.png',
+		'aqua':f'{root}/hex_aqua.png',
+		'blue':f'{root}/hex_blue.png',
+		'brass':f'{root}/hex_brass.png',
+		'brown':f'{root}/hex_brown.png',
+		'cyan':f'{root}/hex_cyan.png',
+		'gray':f'{root}/hex_gray.png',
+		'green':f'{root}/hex_green.png',
+		'ice':f'{root}/hex_ice.png',
+		'lavender':f'{root}/hex_lavender.png',
+		'mint':f'{root}/hex_mint.png',
+		'orchid':f'{root}/hex_orchid.png',
+		'purple':f'{root}/hex_purple.png',
+		'red':f'{root}/hex_red.png',
+		'rose':f'{root}/hex_rose.png',
+		'whiskey':f'{root}/hex_whiskey.png',
+		'yellow':f'{root}/hex_yellow.png'
+	}
+	hex_additional_textures = {
+		'shadow':f'{root}/hex_shadow.png',
+		'water':f'{root}/hex_water.png',
+		'back':f'{root}/hex_background.png',
+		None:f'{root}/hex_missing.png'
+	}
 
+
+	# переделываем все пути в текстуры списковым включением
+
+	#pygame.image.load().convert_alpha()
+	hex_textures = {k: pygame.image.load(v) for k, v in hex_textures.items()}
+	hex_additional_textures = {k: pygame.image.load(v) for k, v in hex_additional_textures.items()}
+	#hex_textures = [pygame.image.load(hex_textures[i]) for i in hex_textures]
+	#hex_additional_textures = [pygame.image.load(hex_additional_textures[i]) for i in hex_additional_textures]
+
+	# поворот всех текстур на 30 градусов
+	hex_textures = {k: pygame.transform.rotate(v, rotation) for k, v in hex_textures.items()}
+	hex_additional_textures = {k: pygame.transform.rotate(v, rotation) for k, v in hex_additional_textures.items()}
+
+	return hex_textures, hex_additional_textures
+
+hex_textures, hex_additional_textures = load_textures('./hex_textures')
 
 class Content(object):
 	"""docstring for Content"""
@@ -48,16 +59,28 @@ class Content(object):
 		self.hitbox = self.texture.get_rect()
 		self.hitbox.center = center
 
-
-
-# использует отрисовку текстурами
 class Cell(object):
 	"""docstring for Cell"""
-	def __init__(self, center, corners, team:str = None):
+	def setTexture(self, team):
+		# поиск текстуры в обоих словарях
+		texture = hex_textures.get(team, None)
+		texture2 = hex_additional_textures.get(team, None)
+
+		if texture:
+			self.texture = texture 
+		elif texture2:
+			self.texture = texture2
+		else:
+			self.texture = hex_additional_textures[None]
+
+
+	def __init__(self, center, corners, team:str = 'back'):
 
 		self.team = team
 		# присваивание текстуры в зависимости от team, а иначе если None или невозможный ключ, то 'missing texture'
-		self.texture = hex_textures.get(team, hex_additional_textures[None])
+
+		self.setTexture(self.team)
+		print("выдали текстуру команды", team, f"({self.texture})")
 		
 
 		# хитбокс на основе углов шестиугольника
@@ -71,14 +94,21 @@ class Cell(object):
 		# что внутри (человечки, деревца)
 		self.content = None
 
+	def regenTexture(self):
+		self.setTexture(self.team)
 
+	def setTeam(self, team, change_texture:bool = True):
+		self.team = team
+
+		if change_texture:
+			self.regenTexture()
 
 	def addContent(self, name:str, texture_path:str):
-		self.content = Content(name, texture_path, self.hitbox.center)
+		self.content = Content(name, texture_path, self.center)
 
-	def blit(self, screen, allow_content:bool = True, allow_hitbox:bool = False):
+	def blit(self, screen, allow_hitbox:bool = False, allow_content:bool = True):
 
-		h = self.texture.get_heigth()/2
+		h = self.texture.get_height()/2
 		w = self.texture.get_width()/2
 
 		x = self.center[0] - h
@@ -87,7 +117,7 @@ class Cell(object):
 		screen.blit(self.texture, (x, y))
 
 		if allow_hitbox:
-			pygame.draw.polygon(screen, (255, 0, 0), self.corners, 3)
+			pygame.draw.polygon(screen, (255, 0, 0), self.hitbox, 2)
 
 		if self.content and allow_content:
 			screen.blit(self.content.texture, self.content.hitbox)
@@ -97,46 +127,154 @@ class Cell(object):
 		return hex_textures.keys()
 
 
-# старая не используемая технология отрисовки математикой
-class CellColor(object):
-	"""docstring for Cell"""
-	def __init__(self, center, corners, team=None):
+	# мб перевести на Cython
+	def collideHex(self, point):
+	    #center_x = sum(x for x, _ in hexagon) / len(hexagon)
+	    #center_y = sum(y for _, y in hexagon) / len(hexagon)
 
-		#self.number = number # (column, row)
-		
-		# координаты центров (черепашка)
-		self.center = center # (x, y)
-		
-		# список координат углов (список) (для расссчёта колизии)
-		self.corners = corners # [(x, y), (x, y), (x, y), (x, y), (x, y), (x, y)]
-		
-		self.team = team
+	    #center_x = self.center[0]
+	    #center_y = self.center[1]
+	    hexagon = self.hitbox
 
+	    x = point[0]
+	    y = point[1]
 
-		# что внутри
-		self.content = None
+	    inside = False
+	    j = len(hexagon) - 1
+	    for i in range(len(hexagon)):
+	        if (hexagon[i][1] > y) != (hexagon[j][1] > y) and \
+	                x < (hexagon[j][0] - hexagon[i][0]) * (y - hexagon[i][1]) / \
+	                (hexagon[j][1] - hexagon[i][1]) + hexagon[i][0]:
+	            inside = not inside
+	        j = i
 
-	def addContent(self, name:str, texture:str):
-
-		self.content = Content(name, texture, self.center)
-
-	def blit_color(self, screen, color, width, allow_content:bool = True):
-
-		pygame.draw.polygon(screen, color, self.corners, width)
-
-		if self.content and allow_content:
-			screen.blit(self.content.texture, self.content.hitbox)
-
-
+	    return inside
 
 class Pole(object):
 	"""docstring for Pole"""
-	def __init__(self, grid = None):
+	def __generateGrid(self, wight:int = None, height:int = None):
 
+		if height is None and wight is None:
+			raise Exception("Высота и ширина не могут быть одновременно пустыми!")
+		elif height is None:
+			height = wight
+		elif wight is None:
+			wight = height
+
+		# генерация
+		grid = []
+		for h in range(height):
+			interim = []
+			for w in range(wight):
+				interim.append((w,h))
+			grid.append(interim)
+
+		return grid
+
+	def __coords(self, raw, number, side):
+		raw_x = raw[0]
+		raw_y = raw[1]
+
+		a = number[0]
+		b = number[1]
+
+
+		# вычисляем радиус зная сторону
+		rad = (side * math.sqrt(3)) / 2
+
+		# вычисляем x зная радиус и номер ячейки
+		x = (rad*2) * a + raw_x
+		# поправляем если это нечётная строка
+		if b % 2 != 0:
+			x += rad
+
+
+		gipotenusa = rad * 2
+		katet = rad
+		# вычисляем y через теорему пифагора
+		y = (math.sqrt(gipotenusa**2 - katet**2)) * b +raw_y
+		
+
+		res = (x, y)
+		return res
+
+
+	def __calculate_hexagon_sides(self, center, side_length, rotation = 30):
+		center_x = center[0]
+		center_y = center[1]
+
+
+		sides = []
+		angle = 60  # угол между сторонами шестиугольника
+
+		for i in range(6):
+			start_x = center_x + side_length * math.cos(math.radians(angle * i + rotation))
+			start_y = center_y + side_length * math.sin(math.radians(angle * i + rotation))
+			
+			sides.append((float(start_x), float(start_y)))
+
+		return sides
+
+
+
+	def __toHexGrid(self, main_coords, grid, side_length):
+		res = []
+		for row in grid:
+			
+			interim = []
+			for i in row:
+
+				# вычисляем координаты центра шестиугольника, зная его номер и координаты №0,0
+				center = self.__coords(main_coords, i, side_length)
+				# вычисляем координаты его углов, зная координаты центра и длину стороны
+				corners = self.__calculate_hexagon_sides(center, side_length)
+				# создаём экземпляр класса с заданными параметрами
+				interim.append(Cell(center, corners))
+			res.append(interim)
+		return res
+	
+	def __init__(self, zeros_coords, side_length, wight:int = None, height:int = None):
+
+		grid = self.__generateGrid(wight, height)
+		grid = self.__toHexGrid(zeros_coords, grid, side_length)
 		self.grid = grid
 
 
+		self.selected = (None, None)
+		self.__last_selected = self.selected
 
+	# мб перевести на Cython
+	# функция возвращает координаты шестиугольника на сетке, соприкасающегося с точкой
+	def collideHexes(self, point):
+		for n, row in enumerate(self.grid):
+			for n2, i in enumerate(row):
+
+				if i.collideHex(point):
+					return n, n2
+		return None, None
+	
+	# функция опредляет выбранный шестиугольник, с помощью collideHexes
+	def select(self, point):
+
+		# определяем на какой навелись
+		select_x, select_y = self.collideHexes(point)
+		last_x = self.__last_selected[0]
+		last_y = self.__last_selected[1]
+
+		# если прошлая была другая
+		if (select_x != last_x or select_y != last_y):
+
+			if last_x != None and last_y != None:
+				self.grid[last_x][last_y].regenTexture()
+			
+			if select_x != None and select_y != None:
+				self.grid[select_x][select_y].setTexture('shadow')
+			
+			#print("\nнавелись на", (select_x, select_y))
+			#print("перестали наводиться на", (last_x, last_y))
+
+			self.selected = (select_x, select_y)
+			self.__last_selected = (select_x, select_y)
 
 class Player(object):
 	"""docstring for Player"""
@@ -178,53 +316,6 @@ class Player(object):
 
 	def profitRelease(self):
 		self.balance += self.profit
-
-
-
-
-
-
-		
-		
-
-'''
-class Pole(object):
-	"""docstring for Pole"""
-	def __init__(self, pole = None):
-		
-
-		self.pole = pole
-	
-	def buildPole(self):
-		# функция для сборки поля (или надо это делать во время инициализации пожалуй)
-		None
-
-
-
-class Cell(object):
-	"""docstring for Cell
-	одна ячейка поля
-
-	"""
-	def __init__(
-		self, 
-		container = None,
-		sides = {
-			1:None,
-			2:None,
-			3:None,
-			4:None,
-			5:None,
-			6:None
-		}):
-		
-		self.sides = sides
-		self.belong = None # кому принадлежит => во что красить
-		self.container = container # переменная в которой храниться объект содержащийся в ячейке
-'''
-						
-
-
 
 class GAME(object):
 	"""docstring for GAME"""
